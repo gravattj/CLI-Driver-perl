@@ -29,18 +29,23 @@ unshift @INC, 't/lib';
 $| = 1;
 $Driver = CLI::Driver->new( path => 't/etc', file => 'cli-driver.yml' );
 
-###
 
-# test 3 without optional arg
-push @ARGV, '-m', 'foo', '-s', 'bar';
+#
+# happy path 1 - without optional arg
+#
 
+@ARGV = qw(-m foo -s bar);
 my $action = $Driver->get_action(name => 'test4');
 ok($action);
 
 my $result = $action->do;
 ok(!defined $result);
 
-push @ARGV, '-o', 'biz';
+#
+# happy path 2 - with optional arg
+#
+
+@ARGV = qw(-m foo -s bar -o biz);
 $result = $action->do;
 ok($result eq 'biz');
  

@@ -31,19 +31,16 @@ $Driver = CLI::Driver->new( path => 't/etc', file => 'cli-driver.yml' );
 
 ###
 
-# test 3 without optional arg
-push @ARGV, '-m', 'foo', '-s', 'bar';
+push @ARGV, '-m', 'foo', '-x', 'extra';
 
-my $action = $Driver->get_action(name => 'test5');
+my $action = $Driver->get_action(name => 'test10');
 ok($action);
 
-my $result = $action->do;
-ok(!$result);
+my $result;
+eval { $result = $action->do };
+ok($@);
+ok(scalar(@ARGV) == 2); # should have "-x extra" still on ARGV
 
-push @ARGV, '--dry-run';
-$result = $action->do;
-ok($result);
- 
 ###
 
 done_testing();

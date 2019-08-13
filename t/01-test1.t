@@ -38,10 +38,7 @@ my $ret;
 eval { $ret = $action->do; };
 ok( !$@ ) or die $@;
 ok($ret eq 'hello world');
-
-push @ARGV, '-f', 'foo';
-eval { $action->do; };
-ok( !$@ ) or die $@;
+ok($action->desc);
 
 ###
 
