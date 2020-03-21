@@ -12,19 +12,18 @@
 #    name: "My::Class::Name"
 #    attr:
 #      required:
-#        hard:
-#         a: abc
-#        soft:
-#         b: xyz
+#        a: attr_name
+#        b: attr_name
 #      optional:
-#        f: foo
+#        c: attr_name
 #      flags:
-#        dry-run: dry_run_flag
+#        dry-run: dry_run_flag_method
 #  method:
 #    name: my_method_name
 #    args:
 #      required:
-#        hard:
-#        soft:
+#        d: arg_name
 #      optional:                   
+#        e: arg_name
 #      flags:
+#        verbose: verbose_method
