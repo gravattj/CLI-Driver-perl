@@ -10,7 +10,7 @@ use CLI::Driver::Action;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.50;
+our $VERSION = 0.60;
 
 =head1 NAME
 
@@ -37,6 +37,7 @@ This is a module to drive your cli tool from a yaml config file.
 	### cli-driver.yml example
 	
 	do-something:
+	  desc: "Action description"
       class:
         name: My::App
         attr:
@@ -45,6 +46,7 @@ This is a module to drive your cli tool from a yaml config file.
               f: foo
             soft:
               h: home
+              a: '@array_arg'
           optional:
           flags:
             dry-run: dry_run_flag
@@ -56,6 +58,11 @@ This is a module to drive your cli tool from a yaml config file.
             soft:
           optional:
           flags:
+      help:
+        args:
+          f: "Additional help info for argument 'f'"
+        examples:
+          - "-f foo -a val1 -a val2 --dry-run"
 =cut
 
 ##############################################################################

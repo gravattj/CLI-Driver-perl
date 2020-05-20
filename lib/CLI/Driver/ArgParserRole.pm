@@ -83,12 +83,20 @@ method _parse_req_args (HashRef :$type_href) {
 
 method _parse_req_args_v2 (HashRef :$type_href!, 
 						   Str     :$cli_arg! ) {
-
+    
+    my $method_arg = $type_href->{$cli_arg};
+    
+    my $is_array = 0;
+    if( $method_arg =~ s/^\@(.+)/$1/ ){
+        $is_array = 1;
+    }
+        
 	return CLI::Driver::Option->new(
 		required   => 1,
 		hard       => 1,
 		cli_arg    => $cli_arg,
-		method_arg => $type_href->{$cli_arg}
+		method_arg => $method_arg,
+		is_array   => $is_array
 	);
 }
 
@@ -111,13 +119,21 @@ method _parse_req_args_v1 (HashRef :$type_href!,
 	my $subtype_href = $type_href->{$subtype};
 
 	foreach my $cli_arg ( keys %$subtype_href ) {
+	    
+	    my $method_arg = $subtype_href->{$cli_arg};
+	    
+	    my $is_array = 0;
+        if( $method_arg =~ s/^\@(.+)$/$1/ ){
+            $is_array = 1;
+        }
 
 		push @ret,
 		  CLI::Driver::Option->new(
 			required   => 1,
 			hard       => $hard,
 			cli_arg    => $cli_arg,
-			method_arg => $subtype_href->{$cli_arg}
+			method_arg => $method_arg,
+			is_array   => $is_array
 		  );
 	}
 
@@ -137,11 +153,17 @@ method _parse_opt_args (HashRef :$type_href) {
 	foreach my $cli_arg ( keys %$type_href ) {
 
 		my $method_arg = $type_href->{$cli_arg};
+		
+		my $is_array = 0;
+        if( $method_arg =~ s/^\@(.+)$/$1/ ){
+            $is_array = 1;
+        }
 
 		my $opt = CLI::Driver::Option->new(
 			required   => 0,
 			cli_arg    => $cli_arg,
-			method_arg => $method_arg
+			method_arg => $method_arg,
+			is_array   => $is_array
 		);
 
 		push @ret, $opt;
