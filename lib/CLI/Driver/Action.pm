@@ -214,9 +214,9 @@ method do {
     my $method_name = $method->name;
     my %sig         = $method->get_signature;
 
-	if (@ARGV) {
-		$self->die( "extra args detected: @ARGV");
-	}
+    if (@ARGV) {
+        $self->die( "extra args detected: @ARGV");
+    }
     
     return $obj->$method_name(%sig);
 }

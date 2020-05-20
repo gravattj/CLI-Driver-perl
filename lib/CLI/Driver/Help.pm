@@ -16,9 +16,9 @@ with
 #has desc => ( is => 'rw' );
 
 has args => (
-	is      => 'rw',
-	isa     => 'HashRef[Str]',
-	default => sub { {} }
+    is      => 'rw',
+    isa     => 'HashRef[Str]',
+    default => sub { {} }
 );
 
 has examples => (
@@ -32,17 +32,17 @@ method parse (HashRef|Undef :$href!) {
     # Don't fail if no help provided.
     return 1 if !defined $href;
 
-	# self->args
-	if( exists $href->{args} ){
-	   $self->args( { %{$href->{args}} } );
-	}
-	
-	# self->examples
+    # self->args
+    if( exists $href->{args} ){
+       $self->args( { %{$href->{args}} } );
+    }
+    
+    # self->examples
     if( exists $href->{examples} ){
        $self->examples( [ @{$href->{examples}} ] );
     }
 
-	return 1;        # success
+    return 1;        # success
 }
 
 method get_help( $arg ) {
@@ -51,7 +51,7 @@ method get_help( $arg ) {
         return $self->args->{$arg};   
     }
 
-	return "";
+    return "";
 }
 
 method has_examples(){
