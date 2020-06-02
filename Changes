@@ -1,5 +1,7 @@
 Revision history for CLI-Driver
 
+0.61 - added clidriver.pl utility 
+
 0.60 - Support multi values via '@' syntax. Additional help block.
 
 0.50 - introduced v2 of the cli-driver file

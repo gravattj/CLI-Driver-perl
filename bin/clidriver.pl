@@ -40,7 +40,7 @@ Getopt::Long::Configure('no_auto_abbrev');
 ###### CONSTANTS ######
 
 # TODO: change to your distribution name (using hyphens)
-use constant DIST_NAME => 'YOUR-DIST-NAME-WITH-HYPHENS';
+use constant DIST_NAME => 'CLI-DRIVER';
 
 # TODO: change to your cli-driver filename IF it differs
 use constant CLI_DRIVER_FILE => 'cli-driver.yml';
