@@ -36,6 +36,7 @@ WriteMakefile(
 		'Time::localtime' => 0,
 		'Module::Load'    => 0,
 		'File::Basename'  => 0,
+		'Util::Medley' => 0,
 		'YAML::Tiny'      => '1.73',
 		'YAML'            => 0,
 	},

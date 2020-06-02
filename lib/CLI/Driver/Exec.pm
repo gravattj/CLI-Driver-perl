@@ -10,6 +10,8 @@ use Data::Printer alias => 'pdump';
 use YAML ();
 use Carp;
 
+with 'Util::Medley::Roles::Attributes::List';
+
 ##############################################################################
 # PUBLIC ATTRIBUTES
 ##############################################################################
@@ -31,7 +33,7 @@ method sortDriverFile (Str  :$driverFile!,
 	my $yaml = YAML::LoadFile($driverFile);
     
     my @sorted = ('---');
-	foreach my $key ( sort( keys %$yaml ) ) {
+	foreach my $key ( $self->List->nsort( keys %$yaml ) ) {
 		push @sorted, YAML::Dump( { $key => $yaml->{$key} } );
 	}
 
