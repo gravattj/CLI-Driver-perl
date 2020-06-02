@@ -25,11 +25,11 @@ use Carp;
 method sortDriverFile (Str  :$driverFile!,
                        Bool :$writeStdout) {
 
-	$YAML::SortKeys  = 0;
+    $YAML::Preserve  = 1;
 	$YAML::UseHeader = 0;
 
 	my $yaml = YAML::LoadFile($driverFile);
-
+    
     my @sorted = ('---');
 	foreach my $key ( sort( keys %$yaml ) ) {
 		push @sorted, YAML::Dump( { $key => $yaml->{$key} } );

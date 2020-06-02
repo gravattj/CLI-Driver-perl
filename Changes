@@ -1,5 +1,7 @@
 Revision history for CLI-Driver
 
+0.62 - fixed yaml sorting issue
+
 0.61 - added clidriver.pl utility 
 
 0.60 - Support multi values via '@' syntax. Additional help block.
