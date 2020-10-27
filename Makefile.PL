@@ -30,6 +30,7 @@ WriteMakefile(
 		'Kavorka'         => 0,
 		'Modern::Perl'    => 0,
 		'Moose'           => 0,
+        'namespace::autoclean' => 0,
 		'Data::Printer'   => 0,
 		'Devel::Confess'  => 0,
 		'Capture::Tiny'   => 0,

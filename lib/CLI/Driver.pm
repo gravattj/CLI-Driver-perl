@@ -10,7 +10,7 @@ use CLI::Driver::Action;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.65;
+our $VERSION = 0.66;
 
 =head1 NAME
 
