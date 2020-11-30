@@ -49,7 +49,7 @@ WriteMakefile(
 			repository => {
 				type => 'git',
 				url  => 'https://github.com/gravattj/CLI-Driver-perl.git',
-				web  => 'https://github.com/gravattj/CLI-Driver-perl/Task-DWIM',
+				web  => 'https://github.com/gravattj/CLI-Driver-perl',
 			},
 			bugtracker => {
 				web => 'https://github.com/gravattj/CLI-Driver-perl/issues'
