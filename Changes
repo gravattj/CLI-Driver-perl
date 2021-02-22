@@ -1,5 +1,7 @@
 Revision history for CLI-Driver
 
+0.70 - Fix _get_val to not through error for missing required soft args
+
 0.69 - added link to source code on github (thanks to Gabor Szabo)
 
 0.68 - removed circular dependency on Util::Medley
