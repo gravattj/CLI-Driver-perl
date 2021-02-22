@@ -166,7 +166,7 @@ method _get_val {
 		}
 
 		# we didn't find it in @ARGV
-		if ( $self->required ) {
+		if ( $self->is_hard && $self->required ) {
 			confess "failed to get arg from argv: $arg";
 		}
 	}

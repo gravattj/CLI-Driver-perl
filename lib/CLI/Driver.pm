@@ -16,7 +16,7 @@ use CLI::Driver::Action;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.69;
+our $VERSION = 0.70;
 
 =head1 SYNOPSIS
 
