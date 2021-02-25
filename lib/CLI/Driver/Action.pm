@@ -11,12 +11,19 @@ use CLI::Driver::Method;
 use CLI::Driver::Help;
 use Module::Load;
 use File::Basename;
+use YAML::Syck;
 
 with 'CLI::Driver::CommonRole';
 
 ###############################
 ###### PUBLIC ATTRIBUTES ######
 ###############################
+
+has href => (
+    is       => 'rw',
+    isa      => 'HashRef',
+    required => 1
+);
 
 has name => ( is => 'rw', isa => 'Str' );
 has desc => ( is => 'rw', isa => 'Str' );
@@ -43,13 +50,13 @@ has 'use_argv_map' => ( is => 'rw', isa => 'Bool' );
 # PUBLIC METHODS
 ##############################################################
 
-method parse (HashRef :$href!) {
+method parse {
 
-    $self->_handle_class($href)  or return 0;
-    $self->_handle_method($href) or return 0;
-    $self->_handle_deprecation($href);
-    $self->_handle_desc($href);
-    $self->_handle_help($href);
+    $self->_handle_class  or return 0;
+    $self->_handle_method or return 0;
+    $self->_handle_deprecation;
+    $self->_handle_desc;
+    $self->_handle_help;
 
     return 1;
 }
@@ -79,7 +86,7 @@ method usage {
     foreach my $arg ( sort { uc($a) cmp uc($b) } keys %opts ) {
 
         my $opt = $opts{$arg};
-        printf "\t%s\n", $opt->get_usage($arg);
+        printf "\t%s\n",   $opt->get_usage($arg);
         printf "\t\t%s\n", $help->get_usage($arg) if $help->has_help($arg);
     }
 
@@ -98,7 +105,7 @@ method usage {
 
         my $opt = $opts{$arg};
         printf "\t[ %s ]\n", $opt->get_usage($arg);
-        printf "\t\t%s\n", $help->get_usage($arg) if $help->has_help($arg);
+        printf "\t\t%s\n",   $help->get_usage($arg) if $help->has_help($arg);
     }
 
     #
@@ -113,10 +120,10 @@ method usage {
     }
 
     foreach my $arg ( sort { uc($a) cmp uc($b) } keys %opts ) {
-        
+
         my $opt = $opts{$arg};
         printf "\t[ %s ]\n", $opt->get_usage($arg);
-        printf "\t\t%s\n", $help->get_usage($arg) if $help->has_help($arg);
+        printf "\t\t%s\n",   $help->get_usage($arg) if $help->has_help($arg);
     }
 
     #
@@ -198,11 +205,22 @@ method do {
     return $obj->$method_name(%sig);
 }
 
+method to_yaml {
+
+    $YAML::Syck::ImplicitTyping = 1;
+    $YAML::Syck::Headless = 1;
+    $YAML::Syck::SortKeys = 1;
+    
+    return YAML::Syck::Dump( $self->href );
+}
+
 ##############################################################
 # PRIVATE METHODS
 ##############################################################
 
-method _handle_deprecation (HashRef $href!) {
+method _handle_deprecation {
+
+    my $href = $self->href;
 
     #
     # is_deprecated: <bool>
@@ -250,7 +268,9 @@ method _handle_deprecation (HashRef $href!) {
     }
 }
 
-method _handle_class (HashRef $href!) {
+method _handle_class {
+
+    my $href = $self->href;
 
     if ( $href->{class} ) {
 
@@ -268,7 +288,9 @@ method _handle_class (HashRef $href!) {
     return 0;
 }
 
-method _handle_method (HashRef $href!) {
+method _handle_method {
+
+    my $href = $self->href;
 
     if ( $href->{method} ) {
 
@@ -286,14 +308,18 @@ method _handle_method (HashRef $href!) {
     return 0;
 }
 
-method _handle_desc (HashRef $href!) {
+method _handle_desc {
+
+    my $href = $self->href;
 
     if ( $href->{desc} ) {
         $self->desc( $href->{desc} );
     }
 }
 
-method _handle_help (HashRef $href!) {
+method _handle_help {
+
+    my $href = $self->href;
 
     my $help = CLI::Driver::Help->new;
     $help->parse( href => $href->{help} );

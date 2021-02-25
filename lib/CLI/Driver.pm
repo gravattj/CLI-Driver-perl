@@ -11,7 +11,6 @@ use Moose;
 use namespace::autoclean;
 use Kavorka 'method';
 use Data::Printer alias => 'pdump';
-use YAML::Tiny;
 use CLI::Driver::Action;
 use Module::Load;
 
@@ -20,9 +19,12 @@ Getopt::Long::Configure('no_ignore_case');
 Getopt::Long::Configure('pass_through');
 Getopt::Long::Configure('no_auto_abbrev');
 
+use YAML::Syck;
+$YAML::Syck::ImplicitTyping = 1;
+
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.73;
+our $VERSION = 0.74;
 
 =head1 SYNOPSIS
 
@@ -189,7 +191,7 @@ has argv_map => (
     predicate => 'has_argv_map',
     writer    => '_set_argv_map',
 );
-  
+
 =head2 actions
 
 A list of actions parsed from the driver file.
@@ -267,8 +269,12 @@ method parse_cmd_line {
 
     my $help;
     my $action_name;
+    my $dump;
 
-    GetOptions( "help|?" => \$help );
+    GetOptions(    #
+        "dump"   => \$dump,
+        "help|?" => \$help
+    );
 
     if ( !@ARGV ) {
         $self->usage;
@@ -280,6 +286,11 @@ method parse_cmd_line {
     my $action;
     if ($action_name) {
         $action = $self->get_action( name => $action_name );
+    }
+
+    if ($dump) {
+        say $action->to_yaml;
+        exit;
     }
 
     if ($help) {
@@ -356,7 +367,7 @@ method _find_file {
 
         push @search_dirs, DEFAULT_CLI_DRIVER_PATH;
     }
-    
+
     foreach my $path (@search_dirs) {
         my $fullpath = sprintf "%s/%s", $path, $self->file;
         if ( -f $fullpath ) {
@@ -379,11 +390,12 @@ method _build_actions {
     foreach my $action_name ( keys %$actions ) {
 
         my $action = CLI::Driver::Action->new(
+            href         => $actions->{$action_name},
             name         => $action_name,
             use_argv_map => $self->has_argv_map ? 1 : 0
         );
 
-        my $success = $action->parse( href => $actions->{$action_name} );
+        my $success = $action->parse;
         if ($success) {
             push @actions, $action;
         }
@@ -393,15 +405,14 @@ method _build_actions {
 }
 
 method _parse_yaml (Str :$path!) {
-    
-    my $actions;
+
+    my $href;
     eval {
-        my $yaml = YAML::Tiny->read($path);
-        $actions = $yaml->[0];
+        $href = YAML::Syck::LoadFile($path);
     };
     confess $@ if $@;
 
-    return $actions;
+    return $href;
 }
 
 method _build_file {
