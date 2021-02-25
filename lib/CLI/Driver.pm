@@ -22,50 +22,64 @@ Getopt::Long::Configure('no_auto_abbrev');
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.72;
+our $VERSION = 0.73;
 
 =head1 SYNOPSIS
 
-This is a module to drive your cli tool from a yaml config file.
+  use CLI::Driver;
+   
+  my $cli = CLI::Driver->new;
+  $cli->run;
 
-    use CLI::Driver;
+  - or - 
    
-    my $cli = CLI::Driver->new;
-    $cli->run;
-   
-    #################################
-    # cli-driver.yml example
-    ################################# 
-    do-something:
-      desc: "Action description"
-      deprecated:
-        status: false
-        replaced-by: na
-      class:
-        name: My::App
-        attr:
-          required:
-            hard:
-              f: foo
-            soft:
-              h: home
-              a: '@array_arg'
-          optional:
-          flags:
-            dry-run: dry_run_flag
-      method:
-        name: my_method
-        args:
-          required: 
-            hard: 
-            soft:
-          optional:
-          flags:
-      help:
-        args:
-          f: "Additional help info for argument 'f'"
-        examples:
-          - "-f foo -a val1 -a val2 --dry-run"
+  my $cli = CLI::Driver->new(
+      path => './etc:/etc',
+      file => 'myconfig.yml'
+  );
+  $cli->run;
+    
+  - or - 
+
+  my $cli = CLI::Driver->new(
+      use_file_sharedir => 1,
+      file_sharedir_dist_name => 'CLI-Driver',
+  );
+  $cli->run;
+                       
+  #################################
+  # cli-driver.yml example
+  ################################# 
+  do-something:
+    desc: "Action description"
+    deprecated:
+      status: false
+      replaced-by: na
+    class:
+      name: My::App
+      attr:
+        required:
+          hard:
+            f: foo
+          soft:
+            h: home
+            a: '@array_arg'
+        optional:
+        flags:
+          dry-run: dry_run_flag
+    method:
+      name: my_method
+      args:
+        required: 
+          hard: 
+          soft:
+        optional:
+        flags:
+    help:
+     args:
+        f: "Additional help info for argument 'f'"
+     examples:
+        - "-f foo -a val1 -a val2 --dry-run"
           
 =cut
 
@@ -77,17 +91,37 @@ use constant DEFAULT_CLI_DRIVER_PATH => ( '.', 'etc', '/etc' );
 use constant DEFAULT_CLI_DRIVER_FILE => 'cli-driver.yml';
 
 ##############################################################################
-### REQUIRED ATTRIBUTES
+### ATTRIBUTES
 ##############################################################################
 
-##############################################################################
-### OPTIONAL ATTRIBUTES
-##############################################################################
+=head1 ATTRIBUTES
+
+=head2 path
+
+Directory where your cli-driver.yml file is located.  You can specify
+multiple directories by separating them with ':'.  For example, 
+"etc:/etc".
+
+isa: Str
+
+defaults:  .:etc:/etc
+
+=cut
 
 has path => (
     is  => 'rw',
     isa => 'Str',
 );
+
+=head2 file
+
+Name of your YAML driver file.
+
+isa: Str
+
+default: cli-driver.yml
+
+=cut
 
 has file => (
     is      => 'ro',
@@ -96,38 +130,73 @@ has file => (
     builder => '_build_file'
 );
 
+=head2 use_file_sharedir
+
+Flag indicating you want to use File::ShareDir to locate the driver file.
+Requires the attribute 'file_sharedir_dist_name' to be provided.  Is mutually
+exclusive with the 'path' attribute.
+
+isa: Bool
+
+default: 0
+
+=cut
+
 has use_file_sharedir => (
     is      => 'ro',
     isa     => 'Bool',
     default => 0,
 );
 
+=head2 file_sharedir_dist_name
+
+Your distro name.  For example: 'CLI-Driver'.
+
+isa: Str
+
+default: undef
+
+=cut
+
 has file_sharedir_dist_name => (
     is  => 'ro',
     isa => 'Str',
 );
 
-#
-# Overrides @ARGV for fetching command arguments.  Contents example:
-#
-# {
-#    classAttrName1 => 'abc',
-#    classAttrName2 => 'def',
-#    methodArgName1	=> 'ghi'
-# }
-#
-# Notice the cli switches are not part of the map.
-#
+=head2 argv_map
+
+A set of command line overrides for retrieving arguments.  This can be used
+in-place of @ARGV args.
+
+Example: 
+
+  {
+     classAttrName1 => 'abc',
+     classAttrName2 => 'def',
+     methodArgName1	=> 'ghi'
+  }
+
+isa: HashRef
+
+default: undef
+
+=cut
+
+# notice the cli switches are not part of the map.
 has argv_map => (
     is        => 'rw',
     isa       => 'HashRef',
     predicate => 'has_argv_map',
     writer    => '_set_argv_map',
 );
+  
+=head2 actions
 
-##############################################################################
-### ACCESSOR ATTRIBUTES
-##############################################################################
+A list of actions parsed from the driver file.
+
+isa: ArrayRef[CLI::Driver::Action]
+
+=cut
 
 has actions => (
     is      => 'rw',
@@ -135,10 +204,6 @@ has actions => (
     lazy    => 1,
     builder => '_build_actions',
 );
-
-##############################################################################
-### PRIVATE ATTRIBUTES
-##############################################################################
 
 ##############################################################################
 ### PUBLIC METHODS

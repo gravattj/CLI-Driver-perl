@@ -1,5 +1,7 @@
 Revision history for CLI-Driver
 
+0.73 - Improved documentation.
+
 0.72 - incorporated functionality from the example scripts into CLI::Driver.pm
      - added "__PACKAGE__->meta->make_immutable" where appropriate
 
