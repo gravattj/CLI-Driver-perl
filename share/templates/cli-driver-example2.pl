@@ -63,108 +63,112 @@ parse_cmd_line();
 my $action = $CliDriver->get_action( name => $Action );
 
 if ($action) {
-	$action->do;
+    $action->do;
 }
 else {
-	$CliDriver->fatal("failed to find action in config file");
+    $CliDriver->fatal("failed to find action in config file");
 }
 
 ###### END MAIN ######
 
 sub get_repo_dir {
-	
-	my $bindir = dirname $0;
-	my $devdir = dirname $bindir;		
-	
-	return $devdir;
+
+    my $bindir = dirname $0;
+    my $devdir = dirname $bindir;
+
+    return $devdir;
 }
 
 sub get_cli_driver_path {
 
-	#
-	# first attempt to find the driver file in the git repo location
-	#
-	my $sharedir = sprintf "%s/share", get_repo_dir();
-	if ( -f sprintf "%s/%s", $sharedir, CLI_DRIVER_FILE() ) {
-		# local development location
-		return $sharedir;
-	}
+    #
+    # first attempt to find the driver file in the git repo location
+    #
+    my $sharedir = sprintf "%s/share", get_repo_dir();
+    if ( -f sprintf "%s/%s", $sharedir, CLI_DRIVER_FILE() ) {
 
-	#
-	# try the File::ShareDir install location
-	#
-	my $file = dist_file( DIST_NAME(), CLI_DRIVER_FILE());
+        # local development location
+        return $sharedir;
+    }
 
-	return dirname $file;
+    #
+    # try the File::ShareDir install location
+    #
+    my $file = dist_file( DIST_NAME(), CLI_DRIVER_FILE() );
+
+    return dirname $file;
 }
 
 sub check_required {
-	my $opt = shift;
-	my $arg = shift;
+    my $opt = shift;
+    my $arg = shift;
 
-	print_usage("missing arg $opt") if !$arg;
+    print_usage("missing arg $opt") if !$arg;
 }
 
 sub parse_cmd_line {
 
-	my $help;
-	GetOptions( "help|?" => \$help );
+    my $help;
+    GetOptions( "help|?" => \$help );
 
-	if ( !@ARGV ) {
-		print_usage();
-	}
-	elsif (@ARGV) {
-		$Action = shift @ARGV;
-	}
+    if ( !@ARGV ) {
+        print_usage();
+    }
+    elsif (@ARGV) {
+        $Action = shift @ARGV;
+    }
 
-	if ($help) {
-		if ($Action) {
-			help_action();
-		}
-		else {
-			print_usage();
-		}
-	}
+    if ($help) {
+        if ($Action) {
+            help_action();
+        }
+        else {
+            print_usage();
+        }
+    }
 }
 
 sub help_action {
 
-	my $action = $CliDriver->get_action( name => $Action );
-	$action->usage;
+    my $action = $CliDriver->get_action( name => $Action );
+    $action->usage;
 }
 
 sub print_actions {
 
-	my $actions = $CliDriver->get_actions;
-	my @list;
+    my $actions = $CliDriver->get_actions;
+    my @list;
 
-	foreach my $action (@$actions) {
+    foreach my $action (@$actions) {
 
-		next if $action->name =~ /dummy/i;
-		my $display = $action->name;
+        next if $action->name =~ /dummy/i;
 
-		if ( $action->is_deprecated ) {
-			$display .= " (deprecated)";
-		}
+        my @display;
+        push @display, $action->name;
 
-		push @list, $display;
-	}
+        if ( $action->is_deprecated ) {
+            my $depr = $action->deprecated;
+            push @display, sprintf '(%s)', $depr->get_usage_modifier;
+        }
 
-	say "\tACTIONS:";
+        push @list, join( ' ', @display );
+    }
 
-	foreach my $action ( sort @list ) {
-		print "\t\t$action\n";
-	}
+    say "\tACTIONS:";
+
+    foreach my $action ( sort @list ) {
+        print "\t\t$action\n";
+    }
 }
 
 sub print_usage {
-	print STDERR "@_\n\n" if @_;
+    print STDERR "@_\n\n" if @_;
 
-	my $basename = basename($0);
+    my $basename = basename($0);
 
-	printf "\nusage: %s <action> [opts] [-?]\n\n", basename($0);
-	print_actions();
-	print "\n";
+    printf "\nusage: %s <action> [opts] [-?]\n\n", basename($0);
+    print_actions();
+    print "\n";
 
-	exit 1;
+    exit 1;
 }

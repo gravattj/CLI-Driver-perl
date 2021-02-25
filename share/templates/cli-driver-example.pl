@@ -79,13 +79,16 @@ sub print_actions {
     foreach my $action (@$actions) {
 
         next if $action->name =~ /dummy/i;
-        my $display = $action->name;
+        
+        my @display;
+        push @display, $action->name;
 
         if ( $action->is_deprecated ) {
-            $display .= " (deprecated)";
+            my $depr = $action->deprecated;
+            push @display, sprintf '(%s)', $depr->get_usage_modifier;
         }
 
-        push @list, $display;
+        push @list, join(' ' , @display);
     }
 
     say "\tACTIONS:";

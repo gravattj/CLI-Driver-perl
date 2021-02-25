@@ -16,7 +16,7 @@ use CLI::Driver::Action;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.70;
+our $VERSION = 0.71;
 
 =head1 SYNOPSIS
 
@@ -38,6 +38,9 @@ This is a module to drive your cli tool from a yaml config file.
     
     do-something:
       desc: "Action description"
+      deprecated:
+        status: false
+        replaced-by: na
       class:
         name: My::App
         attr:
