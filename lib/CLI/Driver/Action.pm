@@ -56,7 +56,7 @@ method parse (HashRef :$href!) {
 
 method usage {
 
-    printf "\nusage: %s %s [opts] [-?]\n\n", basename($0), $self->name;
+    printf "\nusage: %s %s [opts] [-?]\n\n", $0, $self->name;
     printf "description: %s\n\n", $self->desc if $self->desc;
 
     my $help = $self->help;
@@ -136,7 +136,7 @@ method usage {
     #########################################################################
 
     print "\n";
-    exit;
+    exit 1;
 }
 
 method _new_class {
@@ -309,5 +309,7 @@ method _get_deprecated_msg {
 
     return sprintf "(%s)", $msg;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 use File::ShareDir::Install;
 #$File::ShareDir::Install::INCLUDE_DOTFILES = 0;
 #$File::ShareDir::Install::INCLUDE_DOTDIRS = 0;
-install_share dist => "share";
+install_share 'share';
 
 
 WriteMakefile(
@@ -26,17 +26,17 @@ WriteMakefile(
 		'Test::More' => '0',
 	},
 	PREREQ_PM => {
+        'Data::Printer'   => 0,
+        'Devel::Confess'  => 0,
+        'Capture::Tiny'   => 0,
+        'File::Basename'  => 0,
 		'File::ShareDir'  => 0,
 		'Kavorka'         => 0,
 		'Modern::Perl'    => 0,
+	    'Module::Load'    => 0,
 		'Moose'           => 0,
 		'namespace::autoclean' => 0,
-		'Data::Printer'   => 0,
-		'Devel::Confess'  => 0,
-		'Capture::Tiny'   => 0,
 		'Time::localtime' => 0,
-		'Module::Load'    => 0,
-		'File::Basename'  => 0,
 		'Sort::Naturally' => 0,
 		'YAML::Tiny'      => '1.73',
 		'YAML'            => 0,
@@ -58,3 +58,6 @@ WriteMakefile(
 		},
 	},
 );
+
+package MY;
+use File::ShareDir::Install qw( postamble );

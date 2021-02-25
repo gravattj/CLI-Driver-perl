@@ -1,5 +1,8 @@
 Revision history for CLI-Driver
 
+0.72 - incorporated functionality from the example scripts into CLI::Driver.pm
+     - added "__PACKAGE__->meta->make_immutable" where appropriate
+
 0.71 - implemented new 'deprecated' method
      - deprecated 'is_deprecated' method
      - rearranged share/ and bin/

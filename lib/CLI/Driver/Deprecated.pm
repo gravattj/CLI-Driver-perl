@@ -61,7 +61,7 @@ method parse (HashRef :$href!) {
 method get_usage_modifier {
 
     if ($self->status) {
-        my $msg = 'deprecated';
+        my $msg = 'DEPRECATED';
         if ($self->replaced_by) {
             $msg.= " by " . $self->replaced_by;    
         }        
@@ -73,5 +73,7 @@ method get_usage_modifier {
 }
 
 ########################################################
+
+__PACKAGE__->meta->make_immutable;
 
 1;

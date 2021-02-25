@@ -190,4 +190,6 @@ method _get_val {
     return;
 }
 
+__PACKAGE__->meta->make_immutable;
+
 1;

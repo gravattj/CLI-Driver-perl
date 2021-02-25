@@ -9,33 +9,33 @@ CLI::Driver - Drive your cli tool with YAML
 use Modern::Perl;
 use Moose;
 use namespace::autoclean;
-use Kavorka '-all';
+use Kavorka 'method';
 use Data::Printer alias => 'pdump';
 use YAML::Tiny;
 use CLI::Driver::Action;
+use Module::Load;
+
+use Getopt::Long;
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('pass_through');
+Getopt::Long::Configure('no_auto_abbrev');
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.71;
+our $VERSION = 0.72;
 
 =head1 SYNOPSIS
 
 This is a module to drive your cli tool from a yaml config file.
 
     use CLI::Driver;
-    
+   
     my $cli = CLI::Driver->new;
-    
-    my $action = $cli->get_action( name => $ActionFromArgv );
-    if ($action) {
-        $action->do;
-    }
-    else {
-        $Driver->fatal("failed to find action in config file");
-    }
-
-    ### cli-driver.yml example
-    
+    $cli->run;
+   
+    #################################
+    # cli-driver.yml example
+    ################################# 
     do-something:
       desc: "Action description"
       deprecated:
@@ -66,6 +66,7 @@ This is a module to drive your cli tool from a yaml config file.
           f: "Additional help info for argument 'f'"
         examples:
           - "-f foo -a val1 -a val2 --dry-run"
+          
 =cut
 
 ##############################################################################
@@ -84,15 +85,26 @@ use constant DEFAULT_CLI_DRIVER_FILE => 'cli-driver.yml';
 ##############################################################################
 
 has path => (
-	is  => 'rw',
-	isa => 'Str',
+    is  => 'rw',
+    isa => 'Str',
 );
 
 has file => (
-	is      => 'ro',
-	isa     => 'Str',
-	lazy    => 1,
-	builder => '_build_file'
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
+    builder => '_build_file'
+);
+
+has use_file_sharedir => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => 0,
+);
+
+has file_sharedir_dist_name => (
+    is  => 'ro',
+    isa => 'Str',
 );
 
 #
@@ -107,10 +119,10 @@ has file => (
 # Notice the cli switches are not part of the map.
 #
 has argv_map => (
-	is        => 'rw',
-	isa       => 'HashRef',
-	predicate => 'has_argv_map',
-	writer    => '_set_argv_map',
+    is        => 'rw',
+    isa       => 'HashRef',
+    predicate => 'has_argv_map',
+    writer    => '_set_argv_map',
 );
 
 ##############################################################################
@@ -118,10 +130,10 @@ has argv_map => (
 ##############################################################################
 
 has actions => (
-	is      => 'rw',
-	isa     => 'ArrayRef[CLI::Driver::Action]',
-	lazy    => 1,
-	builder => '_build_actions',
+    is      => 'rw',
+    isa     => 'ArrayRef[CLI::Driver::Action]',
+    lazy    => 1,
+    builder => '_build_actions',
 );
 
 ##############################################################################
@@ -134,45 +146,120 @@ has actions => (
 
 method BUILD (@argv) {
 
-	if ( $self->has_argv_map ) {
-		$self->_build_global_argv_map( $self->argv_map );
-	}
+    if ( $self->has_argv_map ) {
+        $self->_build_global_argv_map( $self->argv_map );
+    }
 }
 
 method set_argv_map (HashRef $argv_map) {
 
-	$self->_set_argv_map( {%$argv_map} );
-	$self->_build_global_argv_map( $self->argv_map );
+    $self->_set_argv_map( {%$argv_map} );
+    $self->_build_global_argv_map( $self->argv_map );
 }
 
 method get_action (Str :$name!) {
 
-	my $actions = $self->get_actions;
+    my $actions = $self->get_actions;
 
-	foreach my $action (@$actions) {
-		if ( $action->name eq $name ) {
-			return $action;
-		}
-	}
+    foreach my $action (@$actions) {
+        if ( $action->name eq $name ) {
+            return $action;
+        }
+    }
 }
 
 method get_actions (Bool :$want_hashref = 0) {
 
-	my @ret = @{ $self->actions };
+    my @ret = @{ $self->actions };
 
-	if ($want_hashref) {
+    if ($want_hashref) {
 
-		my %actions;
-		foreach my $action (@ret) {
-			my $name = $action->name;
-			next if $name =~ /dummy/i;
-			$actions{$name} = $action;
-		}
+        my %actions;
+        foreach my $action (@ret) {
+            my $name = $action->name;
+            next if $name =~ /dummy/i;
+            $actions{$name} = $action;
+        }
 
-		return \%actions;
-	}
+        return \%actions;
+    }
 
-	return \@ret;
+    return \@ret;
+}
+
+method run {
+
+    my $action = $self->parse_cmd_line();
+    if ($action) {
+        $action->do;
+    }
+    else {
+        $self->fatal("failed to find action in config file");
+    }
+}
+
+method parse_cmd_line {
+
+    my $help;
+    my $action_name;
+
+    GetOptions( "help|?" => \$help );
+
+    if ( !@ARGV ) {
+        $self->usage;
+    }
+    elsif (@ARGV) {
+        $action_name = shift @ARGV;
+    }
+
+    my $action;
+    if ($action_name) {
+        $action = $self->get_action( name => $action_name );
+    }
+
+    if ($help) {
+        if ($action) {
+            $action->usage;
+        }
+        else {
+            $self->usage;
+        }
+    }
+
+    return $action;
+}
+
+method usage (Str $errmsg?) {
+
+    print STDERR "$errmsg\n" if $errmsg;
+    print "\nusage: $0 <action> [opts] [-?]\n\n";
+
+    my @list;
+    my $actions = $self->get_actions;
+
+    foreach my $action (@$actions) {
+
+        next if $action->name =~ /dummy/i;
+
+        my @display;
+        push @display, $action->name;
+
+        if ( $action->is_deprecated ) {
+            my $depr = $action->deprecated;
+            push @display, sprintf '(%s)', $depr->get_usage_modifier;
+        }
+
+        push @list, join( ' ', @display );
+    }
+
+    say "\tACTIONS:";
+
+    foreach my $action ( sort @list ) {
+        print "\t\t$action\n";
+    }
+
+    print "\n";
+    exit 1;
 }
 
 ##############################################################################
@@ -181,76 +268,95 @@ method get_actions (Bool :$want_hashref = 0) {
 
 method _find_file {
 
-	my @path;
-	if ( $self->path ) {
-		push @path, split( /:/, $self->path );
-	}
+    my @search_dirs;
 
-	push @path, DEFAULT_CLI_DRIVER_PATH;
+    if ( $self->use_file_sharedir ) {
 
-	foreach my $path (@path) {
-		my $fullpath = sprintf "%s/%s", $path, $self->file;
-		if ( -f $fullpath ) {
-			return $fullpath;
-		}
-	}
+        my $dist_name = $self->file_sharedir_dist_name;
+        if ( !$dist_name ) {
+            confess "must provide file_sharedir_dist_name "
+              . "when use_file_sharedir is true";
+        }
 
-	my $msg = sprintf "unable to find %s in: %s", $self->file,
-	  join( ', ', @path );
-	confess $msg;
+        load 'File::ShareDir';
+
+        @search_dirs = ('./share');
+        push @search_dirs, File::ShareDir::dist_dir($dist_name);
+    }
+    else {
+
+        if ( $self->path ) {
+            push @search_dirs, split( /:/, $self->path );
+        }
+
+        push @search_dirs, DEFAULT_CLI_DRIVER_PATH;
+    }
+    
+    foreach my $path (@search_dirs) {
+        my $fullpath = sprintf "%s/%s", $path, $self->file;
+        if ( -f $fullpath ) {
+            return $fullpath;
+        }
+    }
+
+    my $msg = sprintf "unable to find %s in: %s", $self->file,
+      join( ', ', @search_dirs );
+    confess $msg;
 }
 
 method _build_actions {
 
-	my @actions;
+    my @actions;
 
-	my $driver_file = $self->_find_file;
-	my $actions     = $self->_parse_yaml( path => $driver_file );
+    my $driver_file = $self->_find_file;
+    my $actions     = $self->_parse_yaml( path => $driver_file );
 
-	foreach my $action_name ( keys %$actions ) {
+    foreach my $action_name ( keys %$actions ) {
 
-		my $action = CLI::Driver::Action->new(
-			name         => $action_name,
-			use_argv_map => $self->has_argv_map ? 1 : 0
-		);
-		
-		my $success = $action->parse( href => $actions->{$action_name} );
-		if ($success) {
-			push @actions, $action;
-		}
-	}
+        my $action = CLI::Driver::Action->new(
+            name         => $action_name,
+            use_argv_map => $self->has_argv_map ? 1 : 0
+        );
 
-	return \@actions;
+        my $success = $action->parse( href => $actions->{$action_name} );
+        if ($success) {
+            push @actions, $action;
+        }
+    }
+
+    return \@actions;
 }
 
 method _parse_yaml (Str :$path!) {
+    
+    my $actions;
+    eval {
+        my $yaml = YAML::Tiny->read($path);
+        $actions = $yaml->[0];
+    };
+    confess $@ if $@;
 
-	my $actions;
-	eval {
-		my $yaml = YAML::Tiny->read($path);
-		$actions = $yaml->[0];
-	};
-	confess $@ if $@;
-
-	return $actions;
+    return $actions;
 }
 
 method _build_file {
 
-	if ( $ENV{CLI_DRIVER_FILE} ) {
-		return $ENV{CLI_DRIVER_FILE};
-	}
+    if ( $ENV{CLI_DRIVER_FILE} ) {
+        return $ENV{CLI_DRIVER_FILE};
+    }
 
-	return DEFAULT_CLI_DRIVER_FILE;
+    return DEFAULT_CLI_DRIVER_FILE;
 }
 
 method _build_global_argv_map (HashRef $argv_map) {
 
-	%ARGV = ();
+    %ARGV = ();
 
-	foreach my $key ( keys %$argv_map ) {
-		$ARGV{$key} = $argv_map->{$key};
-	}
+    foreach my $key ( keys %$argv_map ) {
+        $ARGV{$key} = $argv_map->{$key};
+    }
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
