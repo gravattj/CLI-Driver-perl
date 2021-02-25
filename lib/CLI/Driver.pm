@@ -24,7 +24,7 @@ $YAML::Syck::ImplicitTyping = 1;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.74;
+our $VERSION = 0.75;
 
 =head1 SYNOPSIS
 
@@ -286,11 +286,11 @@ method parse_cmd_line {
     my $action;
     if ($action_name) {
         $action = $self->get_action( name => $action_name );
-    }
-
-    if ($dump) {
-        say $action->to_yaml;
-        exit;
+        
+        if ($dump) {
+            say $action->to_yaml;
+            exit;                
+        }
     }
 
     if ($help) {

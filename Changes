@@ -1,5 +1,7 @@
 Revision history for CLI-Driver
 
+0.75 - fixed minor bug in lib/CLI/Driver.pm
+
 0.74 - Switched to YAML::Syck for speed.
 
 0.73 - Improved documentation.
