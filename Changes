@@ -1,10 +1,10 @@
 Revision history for CLI-Driver
 
-0.71 - implemented 'deprecated:' functionality
-     - deprecated 'is_deprecated:' functionality
+0.71 - implemented new 'deprecated' method
+     - deprecated 'is_deprecated' method
      - rearranged share/ and bin/
      - misc usage improvements
- 
+
 0.70 - Fix _get_val to not through error for missing required soft args
 
 0.69 - added link to source code on github (thanks to Gabor Szabo)

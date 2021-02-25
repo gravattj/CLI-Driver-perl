@@ -27,6 +27,7 @@ has deprecated => (
     default => sub { CLI::Driver::Deprecated->new },
 );
 
+# DEPRECATED in favor of 'deprecated'
 has is_deprecated => (
     is      => 'rw',
     isa     => 'Bool',
