@@ -24,7 +24,7 @@ $YAML::Syck::ImplicitTyping = 1;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.75;
+our $VERSION = 0.76;
 
 =head1 SYNOPSIS
 
@@ -308,7 +308,7 @@ method parse_cmd_line {
 method usage (Str $errmsg?) {
 
     print STDERR "$errmsg\n" if $errmsg;
-    print "\nusage: $0 <action> [opts] [-?]\n\n";
+    print "\nusage: $0 <action> [opts] [-?] [--dump]\n\n";
 
     my @list;
     my $actions = $self->get_actions;

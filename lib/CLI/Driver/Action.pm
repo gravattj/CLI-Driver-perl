@@ -63,7 +63,7 @@ method parse {
 
 method usage {
 
-    printf "\nusage: %s %s [opts] [-?]\n\n", $0, $self->name;
+    printf "\nusage: %s %s [opts] [-?] [--dump]\n\n", $0, $self->name;
     printf "description: %s\n\n", $self->desc if $self->desc;
 
     my $help = $self->help;
