@@ -51,7 +51,7 @@ has 'use_argv_map' => ( is => 'rw', isa => 'Bool' );
 ##############################################################
 
 method parse {
-
+    
     $self->_handle_class  or return 0;
     $self->_handle_method or return 0;
     $self->_handle_deprecation;
@@ -207,7 +207,6 @@ method do {
 
 method to_yaml {
 
-    $YAML::Syck::ImplicitTyping = 1;
     $YAML::Syck::Headless = 1;
     $YAML::Syck::SortKeys = 1;
     

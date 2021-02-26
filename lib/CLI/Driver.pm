@@ -20,11 +20,10 @@ Getopt::Long::Configure('pass_through');
 Getopt::Long::Configure('no_auto_abbrev');
 
 use YAML::Syck;
-$YAML::Syck::ImplicitTyping = 1;
 
 with 'CLI::Driver::CommonRole';
 
-our $VERSION = 0.76;
+our $VERSION = 0.77;
 
 =head1 SYNOPSIS
 
@@ -275,7 +274,7 @@ method parse_cmd_line {
         "dump"   => \$dump,
         "help|?" => \$help
     );
-
+    
     if ( !@ARGV ) {
         $self->usage;
     }
@@ -411,7 +410,7 @@ method _parse_yaml (Str :$path!) {
         $href = YAML::Syck::LoadFile($path);
     };
     confess $@ if $@;
-
+    
     return $href;
 }
 

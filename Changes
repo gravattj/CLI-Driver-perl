@@ -1,5 +1,8 @@
 Revision history for CLI-Driver
 
+0.77 - removed setting "$YAML::Syck::ImplicitTyping = 1" due to parsing 
+       errors under certain conditions
+
 0.76 - minor change to usage output
 
 0.75 - fixed minor bug in lib/CLI/Driver.pm
